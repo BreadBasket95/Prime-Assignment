@@ -1,5 +1,6 @@
 #include <iostream>
-
+#include <cmath>
+#include <iomanip>
 // the following directive allows you to use the user-defined class called Timer
 #include "timer.h"
 
@@ -17,7 +18,7 @@ using namespace std;
 * function the change will be made to prime[4] since array is constant pointer
 * to the first element in prime.
 *
-* parameter NUM is the number n you retrieved from the user
+* parameter num is the number n you retrieved from the user
 * parameter SIZE is the size of the array.
 *
 * Note: both algorithms fill an array with all the found prime values. Since the
@@ -25,20 +26,60 @@ using namespace std;
 * store your found values into the prime array
 *
 * Note: the Trial Division algorithm will require you to find the square root of
-* a value.  The C++ function that computes the square root of a number is sqrt()
+* a value.  The C++ function that computes the square root of a SIZEber is sqrt()
 * look up the sqrt function and the library that should be included in the C++
 * reference at http://en.cppreference.com/w/
 *
 *******************************************************************************/
-void trialDivision(int array[], const int NUM, const int SIZE);
-void sieveErat(int array[], const int NUM, const int SIZE);
+void trialDivision(int array[], const int SIZE, char print);
+void sieveErat(int array[], const int SIZE, char print);
+bool primecheck(int temp);
 
 int main() {
 
+  char print;     // variable to recieve the user's decision to print the primes or not
+  char algorithm; // variable to recieve the user's choice of algorithm
   int *prime;     // a pointer that will be used to create an array at run time
   int size = 0;   // variable that would be used to set the size of the array
 	Timer myTimer;  // a Timer class object that you will use to time your algorithms
 
+
+  do
+  {
+    cout << "Enter the desired non-zero integer, n, to find all primes less than n\n";
+    cin >> size;
+  }
+  while(size == 0);
+
+  prime = new int[size]; // initializing the size of the Prime array
+
+  for(int count = 0; count < size; count ++) // loop to populate the the prime array
+  {
+      prime[count] = 0;
+  }
+  do
+  {
+    cout << "Do you want the prime numbers to be printed? Type y or n\n";
+    cin >> print;
+  }
+  while((print != 'y')&&(print != 'n'));
+
+  do
+  {
+    cout << "Which algorithm do you wish to use? Type s for Sieve of Eratosthenes or t for Trial Division\n";
+    cin >> algorithm;
+  }
+  while((algorithm != 's')&&(algorithm != 't'));
+
+  switch (algorithm)
+  {
+    case 't':
+    trialDivision(prime, size, print);
+    break;
+    case 's':
+    sieveErat(prime, size, print);
+    break;
+  };
 
   /*** Your Code *********************************************
   * place your code that asks for user input here.  you are
@@ -73,7 +114,7 @@ int main() {
   *      prime[2] = prime[1] + prime[0]
   *      cout << prime[2];
   *****************************************************************************/
-  prime = new int[size];
+
 
 
 
@@ -95,6 +136,85 @@ int main() {
 
   return 0;
 }
+void primeprint(int array[])
+{
+  cout << "Printing Primes: \n";
+    for(int count = 0; array[count] != 0; count++)
+      cout << array[count] << endl;
+}
+
+bool primecheck(int temp) // function to check each number for its possible factors, from 2 to the square root of the number
+{
+  for(int count = 2; count <= (sqrt(temp)); count++)
+  {
+    if((temp%count) == 0)
+      return false;
+  };
+  return true;
+}
+
+void trialDivision(int array[], const int SIZE, char PRINT)
+{
+Timer myTimer;
+
+myTimer.Start(); // Starting the timer before the algorithm runs
+for(int count = 2, prime_count = 0; count <= SIZE; count++) // The outer loop for the trial division algorithm. This will n-1 times
+{
+  if(primecheck(count)) // This function is called once for every number we're checking. If the number has a factor besides 1, it is skipped
+  {
+    array[prime_count] = count; // If the number being tested is prime, it is stored in the prime array
+    prime_count++; // A counter to keep track of every prime we find through trial division
+  }
+}
+myTimer.Stop();
+cout << "That took " << myTimer.Clocks() << " clock ticks. " << endl;
+cout << "That took " << setprecision(10) << myTimer.Seconds() << " seconds. " << endl;
+
+if(PRINT == 'y') // calling the prime-printing function if the user asks it to.
+  primeprint(array);
+}
+
+
+
+
+
+
+void sieveErat(int array[], const int SIZE, char PRINT)
+{
+  Timer myTimer;
+
+  int n_array[SIZE]; // creating a temporary array to work with
+  for(int count = 0; count < SIZE; count++) // initializing the temporary array with consecutive numbers up to n
+  {
+    n_array[count] = (count+1);
+  }
+  myTimer.Start();
+  for(int count = 2; count <= sqrt(SIZE); count++) // the ou2ter loop that iterates through every number of n that is less than the square root of n
+  {
+    if(n_array[(count-1)] != 0) // this loop checks each element of the temporary array to see if it is zero. Composite elements are changed to zero in this implementation
+    {
+      for(int temp = 2 ; (temp*count) <= SIZE; temp++)   ///// This implementation marks every composite number of the temporary array as 0
+      {                                                  ///// Once the prime check is complete, the only non-zero integers in the temporary
+        n_array[((temp*count)-1)] = 0;                   ///// array are prime. The original array is then populated with the non-zero integers
+      }
+    }
+  }
+  myTimer.Stop();
+  cout << "That took " << myTimer.Clocks() << " clock ticks. " << endl;
+  cout << "That took " << setprecision(10) << myTimer.Seconds() << " seconds. " << endl;
+  for(int count = 1, primecount = 0; count < SIZE; count ++) // This loop populates the original array with the primes we found.
+  {
+    if(n_array[count] != 0)
+    {
+      array[primecount] = n_array[count];
+      primecount++;
+    }
+  }
+
+  if(PRINT == 'y') // calling the prime-printing function if the user asks it to.
+    primeprint(array);
+
+};
 
 
 /*** Your Code *****************************************************************

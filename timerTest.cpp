@@ -20,6 +20,6 @@ int main()
 	cout << "That took " << myTimer.Clocks() << " clock ticks. " << endl;
 	cout << "That took " << setprecision(10) << myTimer.Seconds() << " seconds. " << endl;
 
-	system("pause");
+	//system("pause");
 	return EXIT_SUCCESS;
 }
